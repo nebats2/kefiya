@@ -28,20 +28,7 @@
 - BUY_X_GET_Y → Y item becomes free when present
 - PERCENTAGE_OFF_CATEGORY → % off per item category
 - BULK_DISCOUNT → % off on final cart price
-
-# Data model highlights
-
-- PromotionEntity has composite uniqueness: (x_product_id, y_product_id, enabled)
-
-Unit Tests (JUnit + Mockito)
-ProductServiceTest
-
-create() success + wraps DataIntegrityViolationException
-
-detail() found/missing
-
-listAll() maps to DTO or throws on empty
-
+ 
 # RuleEngineTest
 - ProductServiceTest
   create() success + wraps DataIntegrityViolationException
