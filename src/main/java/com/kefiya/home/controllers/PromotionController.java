@@ -20,7 +20,10 @@ public class PromotionController {
 
     @PostMapping("/create")
     @Operation(summary = "create promotion",
-            description = "`BUY_X_GET_Y` type free y can't be less than 1.")
+            description = "`BUY_X_GET_Y` type free y can't be less than 1.\n" +
+                    "`type` must be from enum values [BUY_X_GET_Y," +
+                    "    PERCENTAGE_OFF_CATEGORY," +
+                    "    BULK_DISCOUNT]")
     public ResponseEntity<PromotionOutModel> create(@Valid @RequestBody PromotionCreateModel createModel, BindingResult bindingResult ){
         ControllerServices.checkBindingResult(bindingResult);
         return ResponseEntity.ok(promotionService.create(createModel));

@@ -1,6 +1,9 @@
 # kefiya
-sample github for cart pricing and reservation
-(For API documentation pls refer - swagger :  http://[IP]:8082/kefiya/swagger-ui/index.html#/ )
+- sample github for cart pricing and reservation
+- A classic Layered (n-tier) architecture using MVC + Repository.
+- Controller → Service → Repository → DB (and back), with mapping between Entity ↔ DTO/Request and Response models around the
+- (For API documentation pls refer - swagger : \n http://[IP]:8082/kefiya/swagger-ui/index.html#/ )
+
 # Features
  - Product
  - Cart/Order
