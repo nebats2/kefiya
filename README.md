@@ -68,4 +68,7 @@ listAll() maps to DTO or throws on empty
 
 # API Information:
 - Server: server.port=8082 context path /kefiya    (E.g. on localhost http://localhost:8082/kefiya
-- swagger :  http://localhost:8082/kefiya/swagger-ui/index.html#/ 
+- swagger :  http://localhost:8082/kefiya/swagger-ui/index.html#/\n
+
+# Contact
+  &copy; tsegamtu@gmail.com,  Tsega Bahr. K, 2025
