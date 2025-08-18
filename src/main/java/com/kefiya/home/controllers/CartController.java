@@ -1,5 +1,6 @@
 package com.kefiya.home.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kefiya.home.models.CartConfirmResponse;
 import com.kefiya.home.models.CartRequest;
 import com.kefiya.home.models.CartResponse;
@@ -22,7 +23,7 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping("/quote")
-    public ResponseEntity<CartResponse> create(@Valid @RequestBody CartRequest cartRequest, BindingResult bindingResult ){
+    public ResponseEntity<CartResponse> create(@Valid @RequestBody CartRequest cartRequest, BindingResult bindingResult ) throws JsonProcessingException {
         ControllerServices.checkBindingResult(bindingResult);
         return ResponseEntity.ok(cartService.createQuote(cartRequest));
     }

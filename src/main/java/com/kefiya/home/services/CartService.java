@@ -1,5 +1,7 @@
 package com.kefiya.home.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kefiya.home.database.entities.OrderEntity;
 import com.kefiya.home.database.entities.ProductEntity;
 import com.kefiya.home.database.repos.OrderRepo;
@@ -24,6 +26,7 @@ public class CartService {
     private final ProductRepo productRepo;
     private final OrderRepo orderRepo;
     private final RuleEngine ruleEngine;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public CartConfirmResponse confirmCart(CartResponse cartResponse){
@@ -42,7 +45,13 @@ public class CartService {
         );
     }
 
-    public  CartResponse createQuote(CartRequest cartRequest){
+    public  CartResponse createQuote(CartRequest cartRequest) throws JsonProcessingException {
+        var existingOrder = checkIdempotencyKey(cartRequest.getIdempotencyKey());
+        if(existingOrder != null) {
+            log.info("existing order returned with similar idempotency");
+            return existingOrder;
+        }
+
         var products = productRepo.findAllById(cartRequest.getItems().stream().map(ItemCartRequest::getProductId).toList());
         if (products.isEmpty()) {
             throw new IllegalArgumentException("items are not available in the cart");
@@ -55,14 +64,22 @@ public class CartService {
 
 
         var cartResponse =  ruleEngine.applyRule(cartRequest);
-
+        var prettyWriter =  objectMapper.writerWithDefaultPrettyPrinter();
         order.setFinalPrice(cartResponse.getFinalPrice());
         order.setTotalPrice(cartResponse.getTotalPrice());
+        order.setCartResponse(prettyWriter.writeValueAsString(cartResponse));
         order = saveOrUpdate(order);
         return cartResponse;
 
     }
 
+    private CartResponse checkIdempotencyKey(String idempotencyKey) throws JsonProcessingException {
+            var existingResponse = orderRepo.findByIdempotencyKey(idempotencyKey);
+            if(existingResponse != null){
+               return objectMapper.readValue(existingResponse.getCartResponse(), CartResponse.class);
+            }
+            return null;
+    }
 
     private void updateProductStock(Long productId, int deductableQty){
         var product = productRepo.findById(productId).orElseThrow(
