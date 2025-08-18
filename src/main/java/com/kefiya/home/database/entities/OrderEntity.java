@@ -31,4 +31,7 @@ public class OrderEntity {
     double totalPrice;
     double finalPrice;
 
+    @Lob
+    private String cartResponse;
+
 }
