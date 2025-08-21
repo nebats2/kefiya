@@ -38,6 +38,7 @@ public class RuleEngineTest {
         return p;
     }
 
+
     private PromotionEntity bulk(double percent) {
         var pe = new PromotionEntity();
         pe.setType(PromotionTypes.BULK_DISCOUNT);
@@ -55,17 +56,18 @@ public class RuleEngineTest {
         return pe;
     }
 
-    private PromotionEntity bxgy(ProductEntity freeY) {
+    private PromotionEntity bxgy(ProductEntity buyX, ProductEntity freeY) {
         var pe = new PromotionEntity();
         pe.setType(PromotionTypes.BUY_X_GET_Y);
         pe.setEnabled(true);
         pe.setFreeYProduct(freeY);
+        pe.setBuyXProduct(buyX);
         return pe;
     }
 
 
 
-    private ProductEntity product(long id, ProductCategory cat, double price) {
+    private ProductEntity productY(long id, ProductCategory cat, double price) {
         var p = new ProductEntity();
         p.setId(id);
         p.setTitle("P" + id);
@@ -102,19 +104,19 @@ public class RuleEngineTest {
     @DisplayName("applyRule: BUY_X_GET_Y + Category % + Bulk % → correct final prices & promos")
     void applyRule_combinedPromotions() {
         // Products
-        var p1 = product(1L, ProductCategory.ELECTRONICS, 100.0, 100);
-        var p2 = product(2L, ProductCategory.COFFEE, 50.0, 100);
+        var px = product(1L, ProductCategory.ELECTRONICS, 100.0, 100);
+        var py = product(2L, ProductCategory.COFFEE, 50.0, 100);
 
         // Repos for item lookups in RuleEngine
-        when(productRepo.findById(1L)).thenReturn(Optional.of(p1));
-        when(productRepo.findById(2L)).thenReturn(Optional.of(p2));
+        when(productRepo.findById(1L)).thenReturn(Optional.of(px));
+        when(productRepo.findById(2L)).thenReturn(Optional.of(py));
 
         // Promotions
         when(promotionRepo.findByType(PromotionTypes.BULK_DISCOUNT))
                 .thenReturn(bulk(5.0));  // 5% on cart final
 
         when(promotionRepo.findByType(PromotionTypes.BUY_X_GET_Y))
-                .thenReturn(bxgy(p2));   // product 2 is free Y
+                .thenReturn(bxgy(px,py));   // productY 2 is free Y
 
         when(promotionRepo.findByDiscountCategory(ProductCategory.ELECTRONICS))
                 .thenReturn(catDisc(ProductCategory.ELECTRONICS, 10.0)); // -10% item A

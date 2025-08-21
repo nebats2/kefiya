@@ -65,7 +65,7 @@ public class RuleEngine {
             itemResponse.setFinalPrice(product.getPrice() * item.getQty());
             itemResponse.setAppliedItemPromotion(new ArrayList<>());
 
-            applyItemRules(itemResponse);
+            applyItemRules(itemResponse, cartRequest);
 
             itemCartResponses.add(itemResponse);
         }
@@ -87,32 +87,33 @@ public class RuleEngine {
     }
 
 
-    public void applyItemRules(ItemCartResponse itemCartResponse) {
+    public void applyItemRules(ItemCartResponse itemCartResponse, CartRequest cartRequest) {
         var item = itemCartResponse.getItem();
         var product = productRepo.findById(item.getProductId()).orElseThrow(
-                () -> new EntityNotFoundException("Product y is not found")
+                () -> new EntityNotFoundException("Product is not found")
         );
         var price = item.getQty() * product.getPrice();
         itemCartResponse.setItem(item);
         itemCartResponse.setFinalPrice(price);
 
         // apply rules  by order : we can add rules as a chain
-        applyBuyXFreeYRule(itemCartResponse);
+        applyBuyXFreeYRule(itemCartResponse, cartRequest);
         applyCategoryDiscountRule(itemCartResponse);
 
     }
 
 
-    private void applyBuyXFreeYRule(ItemCartResponse itemCartResponse) {
+    private void applyBuyXFreeYRule(ItemCartResponse itemCartResponse,  CartRequest cartRequest) {
         var freeYPromo = promotionRepo.findByType(PromotionTypes.BUY_X_GET_Y);
         List<PromotionOutModel> appliedPromotions = itemCartResponse.getAppliedItemPromotion();
 
-        if (freeYPromo != null && freeYPromo.getFreeYProduct().getId().equals(itemCartResponse.getItem().getProductId())) {
-            appliedPromotions.add(PromotionOutModel.buildPromoOut(freeYPromo));
-            itemCartResponse.setFinalPrice(0.0);
-            itemCartResponse.setAppliedItemPromotion(appliedPromotions);
+        if( freeYPromo != null && cartRequest.getItems().stream().anyMatch(e->e.getProductId().equals(freeYPromo.getBuyXProduct().getId()))) { // is product x in buyx
+            if ( freeYPromo.getFreeYProduct().getId().equals(itemCartResponse.getItem().getProductId())) {
+                appliedPromotions.add(PromotionOutModel.buildPromoOut(freeYPromo));
+                itemCartResponse.setFinalPrice(0.0);
+                itemCartResponse.setAppliedItemPromotion(appliedPromotions);
+            }
         }
-
     }
 
     private void applyCategoryDiscountRule(ItemCartResponse itemCartResponse) {
